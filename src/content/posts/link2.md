@@ -2,7 +2,7 @@
 title: 验证实验
 published: 2026-10-09
 description: '这里用来写摘要'
-image: ''
+image: '/肥鱼银龙贴贴.png'
 tags: [技术,实验]
 category: '大分类'
 draft: false 
@@ -80,6 +80,7 @@ youxi yikuzou
 然后这里会出现类似列表的结构：
 - 你走了我们吃什么
 - 是啊吃什么
+
 顶头井号#加空格代表标题级数
 ### 大肥鱼天下第一可爱！！！
 
