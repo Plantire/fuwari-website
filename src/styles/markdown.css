@@ -19,12 +19,17 @@
         }
     }
 
-    a:not(.no-styling) {
-        @apply relative bg-none link font-medium text-[var(--primary)]
-        underline decoration-[var(--link-underline)] decoration-1 decoration-dashed underline-offset-4;
-        box-decoration-break: clone;
-        -webkit-box-decoration-break: clone;
-        display: inline-block;
+a:not(.no-styling) {
+  @apply text-blue-600 hover:text-blue-800 transition-colors;
+  text-decoration: underline;
+  text-decoration-color: var(--link-underline);
+  text-decoration-thickness: 1px;
+  text-decoration-style: dashed;
+  text-underline-offset: 4px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  display: inline-block;
+}
     
         &:hover, &:active {
             @apply decoration-transparent;
@@ -118,4 +123,4 @@
         margin: 1em 0;
     }
     
-}
+
