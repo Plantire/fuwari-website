@@ -1,10 +1,10 @@
 ---
-title: link3
+title: 超级雷霆无敌大标题
 published: 2026-10-09
-description: 
-image: ./cover.jpg
-tags: []
-category: 
+description: 摘要
+image: /肥鱼银龙换装.png
+tags: [技术]
+category: 技术
 draft: true
 ---
-
+这里似乎是正文
