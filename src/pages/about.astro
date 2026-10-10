@@ -1,25 +1,57 @@
 ---
-
-import { getEntry, render } from "astro:content";
-import Markdown from "@components/misc/Markdown.astro";
-import I18nKey from "../i18n/i18nKey";
-import { i18n } from "../i18n/translation";
-import MainGridLayout from "../layouts/MainGridLayout.astro";
-
-const aboutPost = await getEntry("spec", "about");
-
-if (!aboutPost) {
-	throw new Error("About page content not found");
-}
-
-const { Content } = await render(aboutPost);
+import MainGridLayout from '../layouts/MainGridLayout.astro';
 ---
-<MainGridLayout title={i18n(I18nKey.about)} description={i18n(I18nKey.about)}>
-    <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
-        <div class="card-base z-10 px-9 py-6 relative w-full ">
-            <Markdown class="mt-2">
-                <Content />
-            </Markdown>
-        </div>
+
+<MainGridLayout title="关于我">
+ <div class="card-base max-w-3xl mx-auto px-8 py-10 rounded-[var(--radius-large)]">
+    
+    <!-- 头部：笔名和一句话简介 -->
+    <div class="text-center mb-12">
+     <h1 class="text-4xl font-bold mb-4 text-[var(--primary)] tracking-widest drop-shadow-md">
+        蓝色大肥鱼
+      </h1>
+      <p class="text-black/60 dark:text-white/60 tracking-widest text-sm">
+        这里是一行简介的占位符
+      </p>
     </div>
+
+    <!-- 正文区：个人介绍 -->
+    <div class="space-y-8 text-black/80 dark:text-white/80 leading-relaxed tracking-wider text-base">
+
+      <section class="space-y-4">
+        <h2 class="text-xl font-semibold border-l-4 border-[var(--primary)] pl-3 text-black/90 dark:text-white/90">
+          关于我
+        </h2>
+        <p>你好，我是夜见。一个喜欢在深夜写东西的人。</p>
+        <p>比起复杂的设定，我更在意字里行间的呼吸感。这里存放着我的长篇连载、短篇随想。</p>
+      </section>
+
+      <section class="space-y-4">
+        <h2 class="text-xl font-semibold border-l-4 border-[var(--primary)] pl-3 text-black/90 dark:text-white/90">
+          小标题1
+        </h2>
+        <ul class="list-disc list-inside space-y-2 pl-2">
+          <li>长篇：《深海回声》（努力填坑中）</li>
+          <li>短篇集：《星屑与玻璃瓶》</li>
+        </ul>
+      </section>
+
+      <section class="space-y-4">
+        <h2 class="text-xl font-semibold border-l-4 border-[var(--primary)] pl-3 text-black/90 dark:text-white/90">
+          联系我
+        </h2>
+        <ul class="space-y-2 text-sm">
+          <li>
+            <span class="opacity-60">B站：</span>
+            <a href="https://space.bilibili.com/297471072" target="_blank" class="text-blue-500 hover:underline">点击这里</a>
+          </li>
+          <li>
+            <span class="opacity-60">邮箱：</span>
+            <span class="text-blue-500">JmySunrise@outlook.com</span>
+          </li>
+        </ul>
+      </section>
+
+    </div>
+  </div>
 </MainGridLayout>

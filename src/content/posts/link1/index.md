@@ -5,6 +5,7 @@ description: 海的那边是什么，我透过你的眼睛去看
 image: /肥鱼银龙换装.png
 tags: [蓝色大肥鱼,Claude,GPT]
 category: 小说
+pinned: true
 draft: false
 ---
 

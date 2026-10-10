@@ -9,11 +9,14 @@ async function getRawSortedPosts() {
 		return import.meta.env.PROD ? data.draft !== true : true;
 	});
 
-	const sorted = allBlogPosts.sort((a, b) => {
-		const dateA = new Date(a.data.published);
-		const dateB = new Date(b.data.published);
-		return dateA > dateB ? -1 : 1;
-	});
+	  const sorted = allBlogPosts.sort((a, b) => {
+    // 1. 先判断置顶：a 置顶且 b 不置顶，a 在前
+    if (a.data.pinned && !b.data.pinned) return -1;
+    // 2. b 置顶且 a 不置顶，b 在前
+    if (!a.data.pinned && b.data.pinned) return 1;
+    // 3. 如果都置顶或都不置顶，按日期从新到旧排
+    return b.data.published.valueOf() - a.data.published.valueOf();
+  });
 	return sorted;
 }
 
