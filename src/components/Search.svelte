@@ -12,6 +12,10 @@ let result: SearchResult[] = [];
 let isSearching = false;
 let pagefindLoaded = false;
 let initialized = false;
+let filterType = "all"; // 可选值：all、category、tag
+let filterValue = "";   // 具体筛选的值（比如“小说”、“Astro”）
+let groupedResult = new Map<string, SearchResult[]>(); // 用来存分组后的结果
+let showDropdown = false; // 控制下拉菜单展开
 
 const fakeResult: SearchResult[] = [
 	{
@@ -63,20 +67,38 @@ const search = async (keyword: string, isDesktop: boolean): Promise<void> => {
 	try {
 		let searchResults: SearchResult[] = [];
 
-		if (import.meta.env.PROD && pagefindLoaded && window.pagefind) {
-			const response = await window.pagefind.search(keyword);
-			searchResults = await Promise.all(
-				response.results.map((item) => item.data()),
-			);
-		} else if (import.meta.env.DEV) {
-			searchResults = fakeResult;
-		} else {
-			searchResults = [];
-			console.error("Pagefind is not available in production environment.");
-		}
+		        if (import.meta.env.PROD && pagefindLoaded && window.pagefind) {
+            // 1. 根据 UI 选择，构建 filters 参数
+            const filters: Record<string, string> = {};
+            if (filterType !== "all" && filterValue.trim()) {
+                filters[filterType] = filterValue.trim();
+            }
 
-		result = searchResults;
-		setPanelVisibility(result.length > 0, isDesktop);
+            // 2. 调用 Pagefind API，传入 filters
+            const response = await window.pagefind.search(keyword, {
+                filters: Object.keys(filters).length > 0 ? filters : undefined,
+            });
+            searchResults = await Promise.all(
+                response.results.map((item) => item.data()),
+            );
+        } else if (import.meta.env.DEV) {
+            searchResults = fakeResult;
+        } else {
+            searchResults = [];
+            console.error("Pagefind is not available in production environment.");
+        }
+
+        // 3. 把结果按分类（category）分组
+        const grouped = new Map<string, SearchResult[]>();
+        searchResults.forEach((item) => {
+            const cat = item.meta?.category || "未分类";
+            if (!grouped.has(cat)) grouped.set(cat, []);
+            grouped.get(cat)!.push(item);
+        });
+
+        result = searchResults;
+        groupedResult = grouped; // 存分组结果
+        setPanelVisibility(result.length > 0, isDesktop);
 	} catch (error) {
 		console.error("Search error:", error);
 		result = [];
@@ -148,6 +170,74 @@ $: if (initialized && keywordMobile) {
            class="transition-all pl-10 text-sm bg-transparent outline-0
          h-full w-40 active:w-60 focus:w-60 text-black/50 dark:text-white/50"
     >
+<div class="flex items-center gap-1.5 ml-2 text-xs">
+  <!-- 自定义下拉菜单 -->
+  <div class="relative">
+    <button
+      on:click={() => (showDropdown = !showDropdown)}
+      class="flex items-center gap-1 px-3 py-1 rounded-lg
+             bg-black/5 dark:bg-white/5
+             text-black/60 dark:text-white/60
+             hover:bg-black/10 dark:hover:bg-white/10
+             transition-colors cursor-pointer"
+    >
+      <span>
+        {filterType === "all" ? "全部" : filterType === "category" ? "分类" : "标签"}
+      </span>
+      <Icon
+        icon="material-symbols:keyboard-arrow-down-rounded"
+        class="text-[0.9rem]"
+      />
+    </button>
+
+    <!-- 下拉面板 -->
+    {#if showDropdown}
+      <!-- 点空白处关闭的遮罩 -->
+      <div
+        class="fixed inset-0 z-10"
+        on:click={() => (showDropdown = false)}
+      ></div>
+      <div
+        class="absolute top-full mt-1 left-0 z-20
+               w-20 py-1 rounded-lg
+               bg-white dark:bg-[#1e1e2e]
+               shadow-lg shadow-black/10 dark:shadow-black/40
+               border border-black/10 dark:border-white/10"
+      >
+        {#each [["all", "全部"], ["category", "分类"], ["tag", "标签"]] as [value, label]}
+          <button
+            on:click={() => {
+              filterType = value;
+              showDropdown = false;
+              search(keywordDesktop, true);
+            }}
+            class="w-full text-left px-3 py-1.5 rounded-md transition-colors
+                   {filterType === value
+                     ? 'bg-[var(--primary)]/15 text-[var(--primary)] font-medium'
+                     : 'text-black/60 dark:text-white/60 hover:bg-black/5 dark:hover:bg-white/10'}"
+          >
+            {label}
+          </button>
+        {/each}
+      </div>
+    {/if}
+  </div>
+
+  <!-- 筛选值输入框 -->
+  {#if filterType !== "all"}
+    <input
+      bind:value={filterValue}
+      on:input={() => search(keywordDesktop, true)}
+      placeholder={filterType === 'category' ? '分类名' : '标签名'}
+      class="w-20 px-2.5 py-1 rounded-lg
+             bg-black/5 dark:bg-white/5
+             text-black/70 dark:text-white/70
+             placeholder:text-black/30 dark:placeholder:text-white/30
+             outline-0 focus:bg-black/10 dark:focus:bg-white/10
+             transition-colors"
+    />
+  {/if}
+</div>
 </div>
 
 <!-- toggle btn for phone/tablet view -->
@@ -173,18 +263,24 @@ top-20 left-4 md:left-[unset] right-4 shadow-2xl rounded-2xl p-2">
     </div>
 
     <!-- search results -->
-    {#each result as item}
-        <a href={item.url}
-           class="transition first-of-type:mt-2 lg:first-of-type:mt-0 group block
-       rounded-xl text-lg px-3 py-2 hover:bg-[var(--btn-plain-bg-hover)] active:bg-[var(--btn-plain-bg-active)]">
-            <div class="transition text-90 inline-flex font-bold group-hover:text-[var(--primary)]">
-                {item.meta.title}<Icon icon="fa6-solid:chevron-right" class="transition text-[0.75rem] translate-x-1 my-auto text-[var(--primary)]"></Icon>
-            </div>
-            <div class="transition text-sm text-50">
-                {@html item.excerpt}
-            </div>
-        </a>
-    {/each}
+    {#each [...groupedResult.entries()] as [category, items]}
+  <div class="text-xs font-bold text-black/40 dark:text-white/40 px-3 pt-4 pb-1">
+    {category}
+  </div>
+  {#each items as item}
+    <a href={item.url}
+       class="transition first-of-type:mt-2 lg:first-of-type:mt-0 group block
+              rounded-xl text-lg px-3 py-2 hover:bg-[var(--btn-plain-bg-hover)] active:bg-[var(--btn-plain-bg-active)]">
+      <div class="transition text-90 inline-flex font-bold group-hover:text-[var(--primary)]">
+        {item.meta.title}
+        <Icon icon="fa6-solid:chevron-right" class="transition text-[0.75rem] translate-x-1 my-auto text-[var(--primary)]"></Icon>
+      </div>
+      <div class="transition text-sm text-50">
+        {@html item.excerpt}
+      </div>
+    </a>
+  {/each}
+{/each}
 </div>
 
 <style>

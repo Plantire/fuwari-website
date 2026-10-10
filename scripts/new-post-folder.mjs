@@ -18,7 +18,8 @@ description:
 image: ./cover.jpg
 tags: []
 category: 
-draft: true
+pinned: false
+draft: false
 ---
 
 `;
