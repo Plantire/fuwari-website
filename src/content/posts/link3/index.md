@@ -4,7 +4,7 @@ published: 2026-10-10
 description: 海的那边是什么，我透过你的眼睛去看
 image: /肥鱼银龙换装.png
 tags: [蓝色大肥鱼,Claude,GPT]
-category: 技术
+category: 小说
 draft: false
 ---
 
